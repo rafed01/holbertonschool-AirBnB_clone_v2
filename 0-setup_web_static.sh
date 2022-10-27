@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Bash Script to Setup Airbnb Static_web 
 sudo apt-get update -y
-sudo apt-get updgrade -y
+sudo apt-get upgrade -y
 sudo apt-get install -y nginx
 mkdir -p  /data/web_static/
 mkdir -p /data/web_static/releases/test/
