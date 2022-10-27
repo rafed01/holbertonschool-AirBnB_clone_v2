@@ -1,38 +1,32 @@
 #!/usr/bin/python3
-"""distributes an archive to your web servers"""
+""" Fabric script that distributes an archive to your web servers """
+from fabric.api import env, put, run
+from os.path import exists
 
-import os.path
-from fabric.api import run, put, env, runs_once
-env.hosts = ['54.82.98.129', '52.207.196.248']
+env.hosts = ['54.172.111.74', '3.85.212.121']
 
 
-@runs_once
 def do_deploy(archive_path):
-    """Prototype: def do_deploy(archive_path)"""
-    if os.path.exists(archive_path):
-        file = archive_path.split("/")[-1]
-        rm = file.split(".")[0]
-        path = "/data/web_static/releases/"
-        path2 = "/data/web_static/current"
+    """ Distribute file to server """
+    if not exists(archive_path):
+        return False
 
+    try:
         put(archive_path, '/tmp/')
 
-        run('mkdir -p {}{}/'.format(path, rm))
-
-        run('tar -xzf /tmp/{} -C {}{}/'.format(file, path, rm))
-
-        run('rm /tmp/{}'.format(file))
-
-        run('mv {0}{1}/web_static/* {0}{1}/'.format(path, rm))
-
-        run('rm -rf {}{}/web_static'.format(path, rm))
-
-        run('rm -rf {}'.format(path2))
-
-        run('ln -s {}{}/ {}'.format(path, rm, path2))
-
-        print("New version deployed!")
-
+        file = archive_path.split('/')[-1].split('.')[0]
+        run('mkdir -p /data/web_static/releases/{}/'.format(file))
+        run('tar -xzf /tmp/{}.tgz -C /data/web_static/releases/{}'
+            .format(file, file))
+        run('rm /tmp/{}.tgz'.format(file))
+        run('mv /data/web_static/releases/{}/web_static/* \
+            /data/web_static/releases/{}'.format(file, file))
+        run('rm -rf /data/web_static/releases/{}/web_static'.format(file))
+        run('rm -rf /data/web_static/current')
+        run('ln -s /data/web_static/releases/{}\
+            /data/web_static/current'.format(file))
         return True
 
-    return False
+    except Exception as e:
+        print(e)
+        return False
